@@ -320,7 +320,7 @@ struct compute_point_score:public thrust::unary_function<Eigen::Vector3f, float>
 
     __host__ __device__
 
-    float operator()(Eigen::Vector3f& point)
+    float operator()(const Eigen::Vector3f& point)
     {
         float score;
 
@@ -422,7 +422,7 @@ struct faster_compute_point_score:public thrust::unary_function<Eigen::Vector3f,
 
 
     __host__ __device__
-    float operator()(Eigen::Vector3f& point)
+    float operator()(const Eigen::Vector3f& point)
     {
         float score;
 
@@ -612,7 +612,7 @@ struct faster_compute_point_scoreV2:public thrust::unary_function<Eigen::Vector3
 
 
     __host__ __device__
-    float operator()(Eigen::Vector3f& point)
+    float operator()(const Eigen::Vector3f& point)
     {
         float score;
 
@@ -693,6 +693,16 @@ void ComputeOptimalPoseV1(const std::vector<Eigen::Vector3f>& scan, const std::v
                           const float& map_resolution)
 
 {
+    thrust::device_vector<int> X(10000);
+    thrust::device_vector<int> Y(10000);
+    thrust::device_vector<int> Z(10000);
+
+    thrust::sequence(X.begin(), X.end());
+    thrust::transform(X.begin(), X.end(), Y.begin(), thrust::negate<int>());
+    thrust::fill(Z.begin(), Z.end(), 2);
+    thrust::transform(X.begin(), X.end(), Z.begin(), Y.begin(), thrust::modulus<int>());
+    thrust::replace(Y.begin(), Y.end(), 1, 10);
+
     thrust::device_vector<Eigen::Matrix<float, 6, 1> > poses = GeneratePoses(
             angular_init_pose, angular_window_size, angular_step_size,
             linear_init_pose, linear_window_size, linear_step_size);
@@ -713,7 +723,7 @@ void ComputeOptimalPoseV1(const std::vector<Eigen::Vector3f>& scan, const std::v
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);
-//    printf("Time to generate transforms: %3.1f ms \n", time);
+    printf("Time to generate transforms: %3.1f ms \n", time);
 
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
@@ -734,8 +744,8 @@ void ComputeOptimalPoseV1(const std::vector<Eigen::Vector3f>& scan, const std::v
     cudaDeviceSynchronize();
 
 
-//    std::cout<<"Number of points in scan: "<<scan_size<<std::endl;
-//    std::cout<<"Number of points in map: "<<map_size<<std::endl;
+    std::cout<<"Number of points in scan: "<<scan_size<<std::endl;
+    std::cout<<"Number of points in map: "<<map_size<<std::endl;
 
     for(int i = 0 ; i < scan.size(); i++)
     {

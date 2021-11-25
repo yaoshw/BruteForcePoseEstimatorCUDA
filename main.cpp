@@ -79,7 +79,7 @@ int main(){
 //                                     <<linear_init_pose[2]<<" m"<<std::endl;
 
     auto S1 = std::chrono::high_resolution_clock::now();
-    ComputeOptimalPoseV1(scan, map, angular_init_pose, angular_window_size, angular_step_size, linear_init_pose, linear_window_size, linear_step_size, map_resolution);
+//    ComputeOptimalPoseV1(scan, map, angular_init_pose, angular_window_size, angular_step_size, linear_init_pose, linear_window_size, linear_step_size, map_resolution);
     auto E1 = std::chrono::high_resolution_clock::now();
     std::cout<<"V1 time: "<<std::chrono::duration<double, std::milli>(E1-S1).count()<<"ms"<<std::endl;
 
